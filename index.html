@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruta Musical UNAL — Trivia Bogotá Musical Internacional</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f4f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 580px;
+    }
+
+    /* ---- INTRO ---- */
+    #intro {
+      background: #fff;
+      border-radius: 16px;
+      border: 0.5px solid #e0ddd6;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .logo-wrap {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      margin-bottom: 1.25rem;
+    }
+    .logo-icon {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: #EEEDFE;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand-name { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+    .brand-sub { font-size: 12px; color: #888; }
+    #intro h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; }
+    #intro p { font-size: 14px; color: #666; margin-bottom: 1.25rem; line-height: 1.6; }
+
+    .region-chips { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 1.5rem; }
+    .chip { font-size: 12px; padding: 4px 14px; border-radius: 99px; font-weight: 600; }
+    .chip-andina  { background: #EEEDFE; color: #3C3489; }
+    .chip-caribe  { background: #FAEEDA; color: #633806; }
+    .chip-pacifico{ background: #E1F5EE; color: #085041; }
+    .chip-llanera { background: #FAECE7; color: #712B13; }
+    .chip-amazonia{ background: #EAF3DE; color: #27500A; }
+
+    #start-btn {
+      background: #534AB7; color: #fff; border: none;
+      border-radius: 12px; padding: 14px 40px;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: background .15s;
+    }
+    #start-btn:hover { background: #3C3489; }
+
+    /* ---- QUIZ ---- */
+    #quiz-area { display: none; }
+
+    .quiz-card {
+      background: #fff; border-radius: 16px;
+      border: 0.5px solid #e0ddd6; padding: 1.5rem;
+    }
+
+    .progress-wrap {
+      background: #eee; border-radius: 99px; height: 5px; margin-bottom: 1.25rem; overflow: hidden;
+    }
+    .progress-fill {
+      height: 5px; border-radius: 99px; background: #534AB7; transition: width .4s ease;
+    }
+
+    .region-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; padding: 4px 12px;
+      border-radius: 99px; margin-bottom: 0.75rem;
+    }
+    .q-counter { font-size: 13px; color: #888; margin-bottom: 0.4rem; }
+    .q-text {
+      font-size: 18px; font-weight: 600; color: #1a1a1a;
+      margin-bottom: 1.25rem; line-height: 1.55;
+    }
+
+    .options { display: flex; flex-direction: column; gap: 9px; margin-bottom: 1.25rem; }
+    .opt-btn {
+      background: #fff; border: 0.5px solid #ccc;
+      border-radius: 12px; padding: 13px 16px;
+      font-size: 14px; color: #1a1a1a; cursor: pointer;
+      text-align: left; display: flex; align-items: center; gap: 10px;
+      transition: background .15s, border-color .15s;
+    }
+    .opt-btn:hover:not(:disabled) { background: #f5f4f0; border-color: #999; }
+    .opt-btn.correct { background: #EAF3DE; border-color: #639922; color: #27500A; }
+    .opt-btn.wrong   { background: #FCEBEB; border-color: #A32D2D; color: #501313; }
+    .opt-btn:disabled { cursor: default; }
+    .opt-letter { font-size: 12px; font-weight: 600; color: #888; min-width: 18px; }
+    .opt-btn.correct .opt-letter { color: #27500A; }
+    .opt-btn.wrong .opt-letter   { color: #501313; }
+
+    .feedback {
+      font-size: 13px; padding: 11px 14px; border-radius: 10px;
+      margin-bottom: 1.25rem; display: none; line-height: 1.5;
+    }
+    .feedback.show { display: block; }
+    .fb-ok { background: #EAF3DE; color: #27500A; border: 0.5px solid #639922; }
+    .fb-no { background: #FCEBEB; color: #501313; border: 0.5px solid #A32D2D; }
+
+    .next-btn {
+      background: #534AB7; color: #fff; border: none;
+      border-radius: 12px; padding: 12px 24px;
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      display: none; width: 100%; transition: background .15s;
+    }
+    .next-btn:hover { background: #3C3489; }
+    .next-btn.show { display: block; }
+
+    /* ---- RESULTADO ---- */
+    #result-area { display: none; }
+    .result-card {
+      background: #fff; border-radius: 16px;
+      border: 0.5px solid #e0ddd6; padding: 1.5rem; text-align: center;
+    }
+    .score-circle {
+      width: 110px; height: 110px; border-radius: 50%;
+      background: #EEEDFE; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; margin: 0 auto 1.25rem;
+    }
+    .score-num { font-size: 36px; font-weight: 700; color: #534AB7; line-height: 1; }
+    .score-denom { font-size: 13px; color: #7F77DD; }
+    .result-title { font-size: 20px; font-weight: 600; color: #1a1a1a; margin-bottom: 0.4rem; }
+    .result-sub { font-size: 14px; color: #666; margin-bottom: 1.25rem; }
+
+    .region-scores {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem;
+    }
+    .rs-card {
+      background: #f5f4f0; border-radius: 10px; padding: 10px 12px; text-align: left;
+    }
+    .rs-label { font-size: 12px; margin-bottom: 4px; font-weight: 600; }
+    .rs-bar-wrap { background: #e0ddd6; border-radius: 99px; height: 5px; margin-bottom: 4px; overflow: hidden; }
+    .rs-bar { height: 5px; border-radius: 99px; }
+    .rs-score { font-size: 12px; font-weight: 600; color: #444; }
+
+    .result-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 1rem; }
+
+    .spotify-wrap, .qr-wrap {
+      background: #f5f4f0; border-radius: 12px;
+      border: 0.5px solid #e0ddd6; padding: 13px 15px; text-align: left;
+    }
+    .wrap-label {
+      font-size: 12px; color: #666; display: block; margin-bottom: 6px; font-weight: 600;
+    }
+    .wrap-input {
+      width: 100%; background: #fff; border: 0.5px solid #ccc;
+      border-radius: 8px; padding: 9px 11px; font-size: 13px; color: #1a1a1a;
+    }
+    .go-spotify {
+      background: #1DB954; color: #fff; border: none;
+      border-radius: 8px; padding: 9px 16px;
+      font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 7px; width: 100%;
+    }
+    .go-spotify:hover { background: #17a349; }
+
+    .gen-qr-btn {
+      background: #534AB7; color: #fff; border: none;
+      border-radius: 8px; padding: 9px 16px;
+      font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 7px; width: 100%;
+    }
+    .gen-qr-btn:hover { background: #3C3489; }
+    #qr-out { margin-top: 10px; text-align: center; }
+    #qr-out img { border-radius: 10px; border: 0.5px solid #e0ddd6; }
+    #qr-out p { font-size: 11px; color: #888; margin-top: 6px; }
+
+    .retry-btn {
+      background: transparent; border: 0.5px solid #ccc;
+      border-radius: 12px; padding: 12px 24px;
+      font-size: 14px; color: #444; cursor: pointer; width: 100%;
+      transition: background .15s;
+    }
+    .retry-btn:hover { background: #f5f4f0; }
+
+    @media (max-width: 480px) {
+      body { padding: 1rem 0.75rem; }
+      .region-scores { grid-template-columns: 1fr; }
+      .q-text { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- INTRO -->
+  <div id="intro">
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <i class="ti ti-map-pin-music" style="font-size:26px;color:#534AB7"></i>
+      </div>
+      <div>
+        <div class="brand-name">Ruta Musical <span style="color:#534AB7">UNAL</span></div>
+        <div class="brand-sub">Bogotá Musical Internacional</div>
+      </div>
+    </div>
+    <h1>Trivia de Músicas Tradicionales</h1>
+    <p>15 preguntas sobre los ritmos, instrumentos y culturas<br>de las 5 regiones musicales de Colombia.</p>
+    <div class="region-chips">
+      <span class="chip chip-andina">Andina</span>
+      <span class="chip chip-caribe">Caribe</span>
+      <span class="chip chip-pacifico">Pacífico</span>
+      <span class="chip chip-llanera">Llanera</span>
+      <span class="chip chip-amazonia">Amazonía</span>
+    </div>
+    <button id="start-btn" onclick="startQuiz()">
+      <i class="ti ti-player-play" style="font-size:16px;vertical-align:-2px"></i>
+      Iniciar recorrido musical
+    </button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-area">
+    <div class="quiz-card">
+      <div class="progress-wrap">
+        <div class="progress-fill" id="prog" style="width:0%"></div>
+      </div>
+      <div id="region-badge-wrap"></div>
+      <div class="q-counter" id="q-counter"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="opts"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQ()">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- RESULTADO -->
+  <div id="result-area">
+    <div class="result-card">
+      <div class="logo-wrap" style="justify-content:center;margin-bottom:1rem">
+        <div class="logo-icon">
+          <i class="ti ti-trophy" style="font-size:26px;color:#534AB7"></i>
+        </div>
+        <div class="brand-name">Resultado final</div>
+      </div>
+      <div class="score-circle">
+        <span class="score-num" id="final-score">0</span>
+        <span class="score-denom">de 15</span>
+      </div>
+      <div class="result-title" id="res-title"></div>
+      <p class="result-sub" id="res-sub"></p>
+      <div class="region-scores" id="region-scores"></div>
+
+      <div class="result-actions">
+        <div class="spotify-wrap">
+          <label class="wrap-label">
+            <i class="ti ti-brand-spotify" style="font-size:14px;vertical-align:-2px"></i>
+            Escucha las músicas en Spotify
+          </label>
+          <input class="wrap-input" type="text" id="spo-url"
+            placeholder="https://open.spotify.com/playlist/...">
+          <button class="go-spotify" onclick="goSpotify()">
+            <i class="ti ti-brand-spotify" style="font-size:14px;vertical-align:-2px"></i>
+            Ir a Spotify
+          </button>
+        </div>
+
+        <div class="qr-wrap">
+          <label class="wrap-label">
+            <i class="ti ti-qrcode" style="font-size:14px;vertical-align:-2px"></i>
+            Compartir esta trivia — genera el QR
+          </label>
+          <input class="wrap-input" type="text" id="qr-url-inp"
+            placeholder="Pega aquí la URL de esta página...">
+          <button class="gen-qr-btn" onclick="genQR()">
+            <i class="ti ti-qrcode" style="font-size:14px;vertical-align:-2px"></i>
+            Generar código QR
+          </button>
+          <div id="qr-out"></div>
+        </div>
+
+        <button class="retry-btn" onclick="retryQuiz()">
+          <i class="ti ti-refresh" style="font-size:14px;vertical-align:-2px"></i>
+          Intentar de nuevo
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ALL = [
+  {r:"Andina",q:"¿Cuál es el instrumento de cuerdas considerado símbolo nacional de Colombia?",opts:["Bandola","Tiple","Requinto","Cuatro"],c:1,exp:"El tiple es declarado instrumento nacional de Colombia. Tiene 12 cuerdas en 4 órdenes triples."},
+  {r:"Andina",q:"¿De qué región es originaria la música carranga (carranguera)?",opts:["Antioquia","Cundinamarca y Boyacá","Nariño","Tolima"],c:1,exp:"La carranga es un ritmo campesino originario de la región cundiboyacense, popularizado por Jorge Velosa."},
+  {r:"Andina",q:"¿Qué ritmo andino colombiano es el más representativo de las fiestas de fin de año?",opts:["Pasillo","Bambuco","Torbellino","Rumba criolla"],c:0,exp:"El pasillo es el género andino más asociado a las festividades decembrinas y reuniones familiares en Colombia."},
+  {r:"Caribe",q:"¿Qué instrumento de viento indígena es base de la cumbia tradicional?",opts:["Flauta de millo","Gaita hembra","Pito traverso","Trompeta"],c:1,exp:"La gaita hembra es el instrumento melódico ancestral de la cumbia. Su sonido característico define el género."},
+  {r:"Caribe",q:"¿En qué ciudad se celebra el Festival de la Leyenda Vallenata cada año?",opts:["Barranquilla","Santa Marta","Valledupar","Montería"],c:2,exp:"El Festival de la Leyenda Vallenata se celebra en Valledupar, capital del Cesar, desde 1968."},
+  {r:"Caribe",q:"¿Cuántos instrumentos conforman el conjunto vallenato tradicional?",opts:["2","3","4","5"],c:1,exp:"El conjunto vallenato clásico tiene 3 instrumentos: acordeón, caja (tambor) y guacharaca."},
+  {r:"Pacífico",q:"¿Qué instrumento es Patrimonio Cultural Inmaterial de la Humanidad según la UNESCO?",opts:["Bombo","Marimba de chonta","Cununo","Shekeré"],c:1,exp:"La marimba de chonta fue declarada por la UNESCO Patrimonio Cultural Inmaterial de la Humanidad en 2015."},
+  {r:"Pacífico",q:"¿Cómo se llama el canto fúnebre tradicional afropacífico de los velorios de adultos?",opts:["Currulao","Alabao","Chigualo","Juga"],c:1,exp:"El alabao es el canto fúnebre comunitario del Pacífico colombiano, también Patrimonio Inmaterial UNESCO."},
+  {r:"Pacífico",q:"¿Cuál es el ritmo más representativo de la región Pacífica colombiana?",opts:["Porro","Currulao","Mapalé","Abozao"],c:1,exp:"El currulao es el ritmo ancestral afropacífico por excelencia. Se toca con marimba, cununos y shekeres."},
+  {r:"Llanera",q:"¿Cuántas cuerdas tiene el arpa llanera colombo-venezolana?",opts:["24","32","36","40"],c:1,exp:"El arpa llanera tradicional tiene 32 cuerdas y es el instrumento melódico principal del joropo."},
+  {r:"Llanera",q:"¿Cómo se llama el instrumento de cuerdas esencial en el conjunto llanero junto al arpa?",opts:["Tiple","Bandola","Cuatro","Requinto"],c:2,exp:"El cuatro es una pequeña guitarra de 4 cuerdas. Junto al arpa y las maracas, forma el trío clásico llanero."},
+  {r:"Llanera",q:"¿Cómo se llama el baile y género musical principal de los Llanos Orientales?",opts:["Pasaje","Joropo","Galerón","Tonada"],c:1,exp:"El joropo es el género y baile emblema de los Llanos. Es Patrimonio Cultural de Colombia y Venezuela."},
+  {r:"Amazonía",q:"¿Cuál instrumento amazónico se usaba para comunicarse entre comunidades a larga distancia?",opts:["Manguaré","Marimba","Gaita","Tiple"],c:0,exp:"El manguaré son dos troncos huecos que se golpean. Su sonido viaja kilómetros en la selva y se usa en rituales."},
+  {r:"Amazonía",q:"¿Qué tipo de flauta es común en los rituales musicales de la Amazonía colombiana?",opts:["Flauta traversa metálica","Flauta de hueso o caña","Flauta dulce plástica","Clarinete"],c:1,exp:"Las flautas de hueso, caña o madera son instrumentos sagrados en muchas comunidades amazónicas."},
+  {r:"Amazonía",q:"¿Qué complejo ritual amazónico incluye música, danza y objetos sagrados de varias etnias?",opts:["Yuruparí","Currulao","Alabao","Costurero"],c:0,exp:"El Yuruparí es un ritual sagrado amazónico con música y danza. Está protegido como patrimonio de varias etnias."}
+];
+
+const COLORS = {
+  Andina:   {bg:"#EEEDFE",color:"#3C3489",bar:"#534AB7"},
+  Caribe:   {bg:"#FAEEDA",color:"#633806",bar:"#BA7517"},
+  "Pacífico":{bg:"#E1F5EE",color:"#085041",bar:"#1D9E75"},
+  Llanera:  {bg:"#FAECE7",color:"#712B13",bar:"#D85A30"},
+  "Amazonía":{bg:"#EAF3DE",color:"#27500A",bar:"#639922"}
+};
+
+let questions=[], current=0, score=0, answered=false;
+const regionScore={Andina:0,Caribe:0,"Pacífico":0,Llanera:0,"Amazonía":0};
+
+function shuffle(arr){
+  let a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz(){
+  questions=shuffle(ALL);
+  Object.keys(regionScore).forEach(k=>regionScore[k]=0);
+  current=0; score=0; answered=false;
+  document.getElementById('intro').style.display='none';
+  document.getElementById('quiz-area').style.display='block';
+  showQ();
+}
+
+function showQ(){
+  answered=false;
+  const q=questions[current];
+  document.getElementById('prog').style.width=((current/questions.length)*100)+'%';
+  document.getElementById('q-counter').textContent=`Pregunta ${current+1} de ${questions.length}`;
+  document.getElementById('q-text').textContent=q.q;
+
+  const c=COLORS[q.r];
+  document.getElementById('region-badge-wrap').innerHTML=
+    `<div class="region-badge" style="background:${c.bg};color:${c.color}">
+       <i class="ti ti-music" style="font-size:13px"></i>${q.r}
+     </div>`;
+
+  const fb=document.getElementById('feedback');
+  fb.className='feedback'; fb.textContent='';
+  const nb=document.getElementById('next-btn');
+  nb.className='next-btn';
+  nb.textContent=current===questions.length-1?'Ver resultados →':'Siguiente →';
+
+  const wrap=document.getElementById('opts');
+  wrap.innerHTML='';
+  ['A','B','C','D'].forEach((letter,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=`<span class="opt-letter">${letter}</span>${q.opts[i]}`;
+    btn.onclick=()=>selectAnswer(i);
+    wrap.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx){
+  if(answered)return;
+  answered=true;
+  const q=questions[current];
+  const btns=document.querySelectorAll('.opt-btn');
+  const fb=document.getElementById('feedback');
+  btns.forEach(b=>b.disabled=true);
+  if(idx===q.c){
+    btns[idx].classList.add('correct');
+    score++; regionScore[q.r]++;
+    fb.className='feedback fb-ok show';
+    fb.innerHTML=`<i class="ti ti-check" style="font-size:14px;vertical-align:-2px"></i> ¡Correcto! ${q.exp}`;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.c].classList.add('correct');
+    fb.className='feedback fb-no show';
+    fb.innerHTML=`<i class="ti ti-x" style="font-size:14px;vertical-align:-2px"></i> Incorrecto. ${q.exp}`;
+  }
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQ(){
+  current++;
+  if(current>=questions.length) showResult();
+  else showQ();
+}
+
+function showResult(){
+  document.getElementById('quiz-area').style.display='none';
+  document.getElementById('result-area').style.display='block';
+  document.getElementById('final-score').textContent=score;
+
+  const pct=score/15;
+  let title, sub;
+  if(pct===1)         { title="¡Experta en músicas colombianas!"; sub="Puntaje perfecto. Conoces profundamente las 5 regiones."; }
+  else if(pct>=0.8)   { title="¡Excelente recorrido musical!"; sub=`${score} de 15 correctas. ¡Muy buen conocimiento regional!`; }
+  else if(pct>=0.6)   { title="¡Buen viaje por la Ruta Musical!"; sub=`${score} de 15 correctas. Hay regiones para explorar más.`; }
+  else if(pct>=0.4)   { title="Ruta en construcción"; sub=`${score} de 15 correctas. ¡Sigue explorando las músicas!`; }
+  else                { title="¡La ruta te espera!"; sub=`${score} de 15. Colombia tiene mucho ritmo por descubrir.`; }
+
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-sub').textContent=sub;
+
+  const wrap=document.getElementById('region-scores');
+  wrap.innerHTML='';
+  ["Andina","Caribe","Pacífico","Llanera","Amazonía"].forEach(r=>{
+    const c=COLORS[r];
+    const s=regionScore[r];
+    const pctR=Math.round((s/3)*100);
+    wrap.innerHTML+=`
+      <div class="rs-card">
+        <div class="rs-label" style="color:${c.color}">${r}</div>
+        <div class="rs-bar-wrap">
+          <div class="rs-bar" style="width:${pctR}%;background:${c.bar}"></div>
+        </div>
+        <div class="rs-score">${s} / 3</div>
+      </div>`;
+  });
+
+  document.getElementById('qr-url-inp').value=window.location.href;
+}
+
+function goSpotify(){
+  const url=document.getElementById('spo-url').value.trim();
+  if(!url){ alert('Pega tu link de Spotify primero.'); return; }
+  window.open(url,'_blank');
+}
+
+function genQR(){
+  const url=document.getElementById('qr-url-inp').value.trim();
+  if(!url){ alert('Pega el link de la trivia primero.'); return; }
+  const enc=encodeURIComponent(url);
+  const qrSrc=`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${enc}`;
+  document.getElementById('qr-out').innerHTML=
+    `<img src="${qrSrc}" width="180" height="180" alt="QR Ruta Musical UNAL">
+     <p>Clic derecho → Guardar imagen para imprimir</p>`;
+}
+
+function retryQuiz(){
+  document.getElementById('result-area').style.display='none';
+  startQuiz();
+}
+</script>
+
+</body>
+</html>
